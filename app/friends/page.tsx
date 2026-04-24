@@ -20,7 +20,7 @@ export default function DateCategoryPage() {
     <div className="min-h-screen bg-[#fdfcf0] p-10 font-sans">
       <div className="max-w-2xl mx-auto">
         <Link href="/" className="text-orange-400 mb-8 inline-block">← 메인으로</Link>
-        <h1 className="text-3xl font-bold mb-10 text-pink-400 border-b-2 border-pink-100 pb-4">💕 데이트 기록</h1>
+        <h1 className="text-3xl font-bold mb-10 text-pink-400 border-b-2 border-pink-100 pb-4">🌸 친구들 기록</h1>
         
         {datePosts.length > 0 ? (
           <div className="space-y-6">
@@ -32,7 +32,7 @@ export default function DateCategoryPage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 italic text-center py-20">아직 등록된 데이트 기록이 없어요. 🌸</p>
+          <p className="text-gray-400 italic text-center py-20">아직 등록된 친구들 기록이 없어요. 🌸</p>
         )}
       </div>
     </div>
