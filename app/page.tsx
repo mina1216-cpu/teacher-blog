@@ -1,87 +1,64 @@
-import React from 'react';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import Link from 'next/link';
 
-const DailyBlog = () => {
+export default function Home() {
+  // 1. posts 폴더에서 파일 목록 읽어오기
+  const postsDirectory = path.join(process.cwd(), 'posts');
+  const fileNames = fs.readdirSync(postsDirectory);
+
+  const allPostsData = fileNames.map((fileName) => {
+    const id = fileName.replace(/\.md$/, ''); // 파일명에서 .md 제거 (주소로 사용)
+    const fullPath = path.join(postsDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+
+    // 2. 마크다운의 윗부분(제목, 날짜 등) 분석하기
+    const matterResult = matter(fileContents);
+
+    return {
+      id,
+      ...(matterResult.data as { title: string; date: string; category: string }),
+    };
+  });
+
   return (
     <div className="min-h-screen bg-[#fdfcf0] font-sans text-gray-700">
-      
-      {/* 1. 상단 네비게이션 (여기가 메뉴 부분입니다!) */}
+      {/* 상단 네비게이션 */}
       <nav className="sticky top-0 z-50 bg-[#fdfcf0]/80 backdrop-blur-md border-b border-orange-100">
         <div className="max-w-3xl mx-auto px-6 h-16 flex justify-between items-center">
-          <h1 className="text-xl font-serif font-medium text-orange-400 tracking-tighter">
-            민아의 일기장
-          </h1>
+          <Link href="/" className="text-xl font-serif font-medium text-orange-400">나의 기록장</Link>
           <div className="flex space-x-8 text-sm font-medium text-gray-500">
-            <a href="/date" className="hover:text-pink-400 transition-colors">💕 데이트</a>
-            <a href="/friends" className="hover:text-blue-400 transition-colors">🍕 친구들</a>
+            <Link href="/date" className="hover:text-pink-400 transition-colors">💕 데이트</Link>
+            <Link href="/friends" className="hover:text-blue-400 transition-colors">🍕 친구들</Link>
           </div>
         </div>
       </nav>
 
-      {/* 2. 헤더 (블로그 대문) */}
       <header className="max-w-3xl mx-auto pt-20 pb-12 px-6 text-center">
-        <p className="text-xs text-orange-300 uppercase tracking-[0.2em] mb-4">Everyday Moments</p>
-        <h2 className="text-4xl font-serif font-light text-gray-800 mb-2">
-          민아 일상의 기록
-        </h2>
+        <h2 className="text-4xl font-serif font-light text-gray-800 mb-2">일상의 기록</h2>
+        <p className="text-sm text-gray-400">메모장에 쓴 글들이 자동으로 올라옵니다</p>
       </header>
 
-      {/* 3. 메인 콘텐츠 */}
+      {/* 3. 글 목록 출력 부분 */}
       <main className="max-w-2xl mx-auto px-6 pb-24">
-        
-        <div className="space-y-24">
-          
-          {/* 포스트 1: 데이트 기록 */}
-          <article className="group cursor-pointer">
-            <div className="overflow-hidden rounded-3xl mb-8 shadow-sm group-hover:shadow-md transition-all duration-500">
-              <div className="w-full h-96 bg-pink-50 flex items-center justify-center text-6xl">
-                🌸
+        <div className="space-y-12">
+          {allPostsData.map(({ id, title, date, category }) => (
+            <article key={id} className="group border-b border-orange-50 pb-8">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[10px] px-2 py-1 bg-orange-100 text-orange-500 rounded-full font-bold uppercase">{category}</span>
+                <span className="text-xs text-gray-300 font-mono">{date}</span>
               </div>
-            </div>
-            <div className="px-2">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-[10px] px-3 py-1 bg-pink-100 text-pink-500 rounded-full font-bold">DATE</span>
-                <span className="text-xs text-gray-300 font-mono">2026. 04. 24</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-3 group-hover:text-pink-400 transition">
-                봄바람 불던 날, 한강 산책
-              </h3>
-              <p className="leading-relaxed text-gray-500">
-                오랜만에 미세먼지도 없고 날씨가 너무 좋았다. 
-                돗자리 펴고 앉아서 도란도란 이야기 나누던 시간...
-              </p>
-            </div>
-          </article>
-
-          {/* 포스트 2: 친구들과의 기록 */}
-          <article className="group cursor-pointer">
-            <div className="overflow-hidden rounded-3xl mb-8 shadow-sm group-hover:shadow-md transition-all duration-500">
-              <div className="w-full h-96 bg-blue-50 flex items-center justify-center text-6xl">
-                🍻
-              </div>
-            </div>
-            <div className="px-2">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-[10px] px-3 py-1 bg-blue-100 text-blue-500 rounded-full font-bold">FRIENDS</span>
-                <span className="text-xs text-gray-300 font-mono">2026. 04. 20</span>
-              </div>
-              <h3 className="text-2xl font-bold mb-3 group-hover:text-blue-400 transition">
-                고등학교 친구들, 10년 만의 모임
-              </h3>
-              <p className="leading-relaxed text-gray-500">
-                다들 변한 게 하나도 없어서 더 신기했다. 
-                그때 그 시절처럼 배가 찢어지게 웃었던 저녁 식사.
-              </p>
-            </div>
-          </article>
-
+              <Link href={`/posts/${id}`}>
+                <h3 className="text-2xl font-bold mb-2 group-hover:text-orange-400 transition cursor-pointer">
+                  {title}
+                </h3>
+              </Link>
+              <p className="text-gray-500 text-sm italic">클릭해서 읽기 →</p>
+            </article>
+          ))}
         </div>
       </main>
-
-      <footer className="py-12 border-t border-orange-50 text-center text-[10px] text-gray-300 tracking-[0.3em] uppercase">
-        © 2026 My Private Diary
-      </footer>
     </div>
   );
-};
-
-export default DailyBlog;
+}

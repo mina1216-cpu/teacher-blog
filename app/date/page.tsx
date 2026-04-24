@@ -1,24 +1,45 @@
-import React from 'react';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import Link from 'next/link';
 
-// 'export default'가 꼭 있어야 합니다! 이게 "내가 이 페이지 주인이다"라는 선언이에요.
-export default function DatePage() {
+// 👇 이 줄에 'export default'가 반드시 있어야 합니다!
+export default function DateCategoryPage() {
+  const postsDirectory = path.join(process.cwd(), 'posts');
+  
+  // 폴더가 없으면 에러가 날 수 있으니 안전장치 추가
+  if (!fs.existsSync(postsDirectory)) {
+    return <div>posts 폴더를 찾을 수 없습니다.</div>;
+  }
+
+  const fileNames = fs.readdirSync(postsDirectory);
+
+  const datePosts = fileNames.map((fileName) => {
+    const id = fileName.replace(/\.md$/, '');
+    const fullPath = path.join(postsDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const { data } = matter(fileContents);
+    return { id, ...(data as { title: string; date: string; category: string }) };
+  }).filter(post => post.category === '데이트');
+
   return (
-    <div className="min-h-screen bg-[#fdfcf0] p-10 font-sans text-gray-700">
+    <div className="min-h-screen bg-[#fdfcf0] p-10 font-sans">
       <div className="max-w-2xl mx-auto">
-        {/* 홈으로 돌아가는 버튼 */}
-        <a href="/" className="text-orange-400 mb-8 inline-block hover:underline">
-          ← 메인으로 돌아가기
-        </a>
+        <Link href="/" className="text-orange-400 mb-8 inline-block">← 메인으로</Link>
+        <h1 className="text-3xl font-bold mb-10 text-pink-400 border-b-2 border-pink-100 pb-4">💕 데이트 기록</h1>
         
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">💕 데이트 기록</h1>
-        
-        <div className="bg-white p-8 rounded-3xl shadow-sm leading-relaxed border border-orange-50">
-          <p className="mb-4">오늘의 데이트는 어땠나요? 😊</p>
-          <p className="text-gray-500">
-            여기에 선생님의 소중한 추억을 한 줄 한 줄 기록해 보세요.
-            파일을 수정하고 저장하면 바로 반영됩니다!
-          </p>
-        </div>
+        {datePosts.length > 0 ? (
+          <div className="space-y-6">
+            {datePosts.map((post) => (
+              <Link href={`/posts/${post.id}`} key={post.id} className="block p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+                <span className="text-xs text-gray-300">{post.date}</span>
+                <h3 className="text-xl font-bold text-gray-800">{post.title}</h3>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 italic text-center py-20">아직 등록된 데이트 기록이 없어요. 🌸</p>
+        )}
       </div>
     </div>
   );

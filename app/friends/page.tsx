@@ -1,14 +1,39 @@
-// app/date/page.tsx (데이트 상세 페이지)
-export default function DatePage() {
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import Link from 'next/link';
+
+export default function DateCategoryPage() {
+  const postsDirectory = path.join(process.cwd(), 'posts');
+  const fileNames = fs.readdirSync(postsDirectory);
+
+  // 모든 글을 가져와서 '데이트' 카테고리인 것만 필터링!
+  const datePosts = fileNames.map((fileName) => {
+    const id = fileName.replace(/\.md$/, '');
+    const fullPath = path.join(postsDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const { data } = matter(fileContents);
+    return { id, ...(data as { title: string; date: string; category: string }) };
+  }).filter(post => post.category === '친구들'); // <-- 여기서 데이트만 골라요!
+
   return (
     <div className="min-h-screen bg-[#fdfcf0] p-10 font-sans">
       <div className="max-w-2xl mx-auto">
-        <a href="/" className="text-orange-400 mb-8 block">← 돌아가기</a>
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">💕 친구들과 놀았던 기록</h1>
-        <div className="bg-white p-8 rounded-3xl shadow-sm leading-relaxed text-gray-600">
-          <p>여기에 오늘 데이트한 상세 내용을 적어보세요!</p>
-          <p className="mt-4">예: 오늘은 맛있는 파스타를 먹고 한강을 걸었다...</p>
-        </div>
+        <Link href="/" className="text-orange-400 mb-8 inline-block">← 메인으로</Link>
+        <h1 className="text-3xl font-bold mb-10 text-pink-400 border-b-2 border-pink-100 pb-4">💕 데이트 기록</h1>
+        
+        {datePosts.length > 0 ? (
+          <div className="space-y-6">
+            {datePosts.map((post) => (
+              <Link href={`/posts/${post.id}`} key={post.id} className="block p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition">
+                <span className="text-xs text-gray-300">{post.date}</span>
+                <h3 className="text-xl font-bold text-gray-800">{post.title}</h3>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 italic text-center py-20">아직 등록된 데이트 기록이 없어요. 🌸</p>
+        )}
       </div>
     </div>
   );
