@@ -11,8 +11,8 @@ const DailyBlog = () => {
             민아의 일기장
           </h1>
           <div className="flex space-x-8 text-sm font-medium text-gray-500">
-            <a href="#" className="hover:text-pink-400 transition-colors">💕 데이트</a>
-            <a href="#" className="hover:text-blue-400 transition-colors">🍕 친구들</a>
+            <a href="/date" className="hover:text-pink-400 transition-colors">💕 데이트</a>
+            <a href="/friends" className="hover:text-blue-400 transition-colors">🍕 친구들</a>
           </div>
         </div>
       </nav>
